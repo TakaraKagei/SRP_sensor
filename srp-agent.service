@@ -1,0 +1,21 @@
+# SRP 寝室センサーの送信プログラムを、ラズパイの起動と同時に動かし続けるための設定。
+# README_ja.md の「6. 自動で動かす」の手順で /etc/systemd/system/ にコピーして使う。
+# ユーザー名やフォルダが違う場合は、User= と /home/takara の部分を書き換える。
+
+[Unit]
+Description=SRP bedroom sensor agent
+Wants=network-online.target time-sync.target
+After=network-online.target time-sync.target sound.target
+
+[Service]
+Type=simple
+User=takara
+WorkingDirectory=/home/takara/Projects/srp_agent
+ExecStart=/home/takara/Projects/srp_agent/.venv/bin/python agent.py
+Restart=always
+RestartSec=15
+# 時刻がずれていると10分の区切りがずれる。時刻合わせを待ってから動く
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

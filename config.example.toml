@@ -1,0 +1,45 @@
+# SRP 寝室センサーの送信プログラムの設定
+# このファイルを config.toml という名前でコピーして、値を書き換える。
+#   cp config.example.toml config.toml
+# 機械用の鍵（SRP_INGEST_KEY）はここに書かない。~/.config/srp-agent/agent.env に書く。
+
+[server]
+# Cloud Run の URL（末尾の / は不要）。Mac で次を実行すると出る:
+#   gcloud run services describe srp --region asia-northeast1 --format='value(status.url)'
+base_url = "https://srp-xxxxxxxxxx-an.a.run.app"
+# このラズパイの名前。送ったデータの出どころとして記録される
+device_id = "bedroom-pi"
+send_timeout_sec = 30
+
+[sampling]
+# 設計（2026-10-13 決定）: 1分ごとに測り、10分ごとにまとめて送る。ふだんは変えない
+sample_interval_sec = 60
+bucket_minutes = 10
+
+[sensors]
+# DS18B20 の ID。sensor_test の  python test_ds18b20.py --watch  でプローブを温めて調べる
+room_ds18b20_id = ""     # 例: "28-00000000e711"
+futon_ds18b20_id = ""    # 例: "28-00000025c86f"
+# 使わないセンサーは false にする
+use_dht11 = true
+use_bmp180 = true
+use_bh1750 = true
+use_scd40 = true
+use_inmp441 = true
+
+[noise]
+# 空なら arecord -l から voicehat を自動で探す。見つからないときは card 番号（例: "3"）
+mic_card = ""
+# L/R 端子を GND にしたので左
+mic_channel = "left"
+# dBFS に足して「目安の dB」にする値。INMP441 の公称感度（94 dB SPL で -26 dBFS）から逆算した 120。
+# 校正していないので騒音計の値とは一致しない。日ごとの比較にだけ使う。途中で変えないこと
+noise_db_offset = 120.0
+# 「ふだんの音（直近5分の中央値）」よりこれだけ大きい音を物音として数える
+noise_event_margin_db = 15.0
+
+[storage]
+# 送れなかった10分値を置く場所。つながったら古い順に送り直す
+data_dir = "~/.local/share/srp-agent"
+# これより古い未送信分は諦めて消す（日数）
+keep_days = 14
