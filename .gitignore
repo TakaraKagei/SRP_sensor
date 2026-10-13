@@ -1,0 +1,5 @@
+# ラズパイごとの設定（鍵は ~/.config/srp-agent/agent.env に置き、ここには無い）
+config.toml
+.venv/
+__pycache__/
+*.py[cod]
